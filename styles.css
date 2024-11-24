@@ -1,0 +1,72 @@
+/* Estilo general de la página */
+body {
+    font-family: 'Courier New', monospace;
+    background-color: black;
+    color: #00ff00; /* Verde Matrix */
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Video de fondo */
+video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Asegura que el video cubra toda la pantalla */
+    z-index: -1; /* Coloca el video en el fondo */
+}
+
+/* Estilos para el título */
+h1 {
+    font-size: 40px;
+    text-align: center;
+    margin-bottom: 30px;
+    text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00;
+    letter-spacing: 2px;
+}
+
+/* Estilo de los inputs y botones */
+input, select, button {
+    background-color: black;
+    color: #00ff00;
+    border: 1px solid #00ff00;
+    padding: 10px;
+    margin: 10px;
+    width: 250px;
+    font-size: 18px;
+    outline: none;
+}
+
+input, select {
+    box-sizing: border-box;
+}
+
+input:focus, select:focus, button:focus {
+    border: 1px solid #00cc00;
+    box-shadow: 0 0 10px #00ff00;
+}
+
+button {
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    background-color: transparent;
+}
+
+button:hover {
+    background-color: #00cc00;
+    color: black;
+    border: 1px solid #00cc00;
+}
+
+button:active {
+    background-color: #00ff00;
+    color: black;
+}
