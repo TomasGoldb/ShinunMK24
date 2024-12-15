@@ -7,17 +7,18 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <video id="background-video" autoplay loop muted>
-        <source src="vecteezy_concept-d12-infinite-abstract-digital-sci-fi-high-technology_10675030.mp4" type="video/mp4">
-        Tu navegador no soporta el formato de video.
-    </video>
-    <div>
+    <div class="container">
         <h1>Insertar Acciones</h1>
-        <label for="nombreSelect">Selecciona un nombre:</label>
-        <select id="nombreSelect"></select>
+
+        <label for="nombreInput">Selecciona un nombre:</label>
+        <div style="position: relative; width: 100%;">
+            <input type="text" id="nombreInput" placeholder="Escribe un nombre">
+<ul id="autocomplete-list"  class="autocomplete-list"></ul>
+
+        </div>
 
         <label for="accionInput">Acción realizada:</label>
-        <input type="text" id="accionInput" placeholder="Escribe la acción" />
+        <input type="text" id="accionInput" placeholder="Escribe la acción">
 
         <button id="btnSubir">Subir Datos</button>
     </div>

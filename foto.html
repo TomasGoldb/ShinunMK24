@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cámara y Subida</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Usa el mismo archivo CSS -->
+    <style>
+        /* Agrega algunos ajustes para dispositivos móviles */
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+
+        video, canvas {
+            width: 90%;
+            max-width: 400px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #preview {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <video id="camera" autoplay playsinline></video>
+    <canvas id="preview"></canvas>
+    <button id="captureButton">Capturar Foto</button>
+    <button id="uploadButton" style="display: none;">Subir Foto</button>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-storage.js";
+
+        // Configuración de Firebase
+        const firebaseConfig = {
+  apiKey: "AIzaSyC20Cd64Ft_N1e48FHQSWXLUWFZ-ZDHW6o",
+  authDomain: "shinunfile.firebaseapp.com",
+  projectId: "shinunfile",
+  storageBucket: "shinunfile.firebasestorage.app",
+  messagingSenderId: "840995620433",
+  appId: "1:840995620433:web:8af5fe3fbb56dd8bbd1a70"
+};
+
+        // Inicializa Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        const camera = document.getElementById("camera");
+        const canvas = document.getElementById("preview");
+        const captureButton = document.getElementById("captureButton");
+        const uploadButton = document.getElementById("uploadButton");
+
+        // Solicitar acceso a la cámara
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                camera.srcObject = stream;
+            } catch (error) {
+                console.error("Error al acceder a la cámara:", error);
+                alert("No se pudo acceder a la cámara.");
+            }
+        }
+
+        startCamera();
+
+        // Capturar la imagen y mostrarla en el canvas
+        captureButton.addEventListener("click", () => {
+            const context = canvas.getContext("2d");
+            canvas.width = camera.videoWidth;
+            canvas.height = camera.videoHeight;
+            context.drawImage(camera, 0, 0, canvas.width, canvas.height);
+            canvas.style.display = "block";
+            uploadButton.style.display = "block";
+        });
+
+        uploadButton.addEventListener("click", async () => {
+    const imageData = canvas.toDataURL("image/png");
+
+    // Convertir el DataURL en un archivo blob
+    const response = await fetch(imageData);
+    const blob = await response.blob();
+
+    // Crear una referencia en Firebase Storage
+    const fileName = `foto_${Date.now()}.png`;
+    const storageRef = ref(storage, `fotos/${fileName}`);
+
+    try {
+        // Subir la imagen a Firebase Storage
+        await uploadBytes(storageRef, blob);
+        console.log("Foto subida correctamente a Storage");
+
+        // Obtener la URL del archivo subido
+        const url = await getDownloadURL(storageRef);
+
+        console.log("URL de la imagen:", url);
+
+        // Guardar la referencia en Firestore
+        const fotosRef = collection(db, "fotos");
+
+        await addDoc(fotosRef, {
+            nombre: fileName,
+            url: url,
+            fecha: new Date().toISOString()
+        });
+
+        console.log("Foto guardada en Firestore");
+
+        // Ocultar el canvas y el botón de subir
+        canvas.style.display = "none";
+        uploadButton.style.display = "none";
+    } catch (error) {
+        console.error("Error al subir la foto:", error);
+        alert("Error al subir la foto. Intenta nuevamente.");
+    }
+});
+    </script>
+</body>
+</html>

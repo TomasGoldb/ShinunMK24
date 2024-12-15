@@ -13,8 +13,12 @@
     </video>
     <div class="container">
         <h1>Búsqueda de Acciones</h1>
-        <label for="nombreInput">Selecciona un nombre:</label>
-        <select id="nombreInput"></select>
+        <div class="input-container">
+            <input id="nombreInput" type="text" placeholder="Escribe un nombre">
+            <span id="clearIcon" class="clear-icon">&#10006;</span> <!-- La cruz -->
+        </div>
+        <ul id="sugerencias" class="autocomplete-list"></ul>
+
         <button id="btnBuscar">Buscar</button>
         <div id="resultados"></div>
     </div>

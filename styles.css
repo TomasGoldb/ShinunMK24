@@ -24,6 +24,45 @@ video {
     z-index: -1; /* Coloca el video en el fondo */
 }
 
+/* Estilos para el contenedor */
+.container {
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.8); /* Fondo semi-transparente */
+    border: 2px solid #00ff00;
+    border-radius: 10px;
+    box-shadow: 0 0 20px #00ff00;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-wrap: wrap;
+    align-content: center;
+    position: relative; /* Posición relativa para el contenedor */
+}
+
+.autocomplete-list {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    max-height: 150px;
+    overflow-y: scroll; /* Permite el desplazamiento */
+    scrollbar-width: none; /* Oculta la barra en navegadores compatibles */
+    background-color: black; /* Fondo oscuro */
+    color: #00ff00; /* Texto verde */
+    border: 1px solid #00ff00;
+    position: absolute; /* Absoluto para que flote */
+    width: calc(100% - 40px); /* Toma el ancho completo del input */
+    box-shadow: 0 0 10px #00ff00;
+    z-index: 100;
+    top: 245px; /* Ajusta este valor según la altura real del input */
+    left: 0; /* Alinea con el input */
+    transform: translateX(4.5%);
+}
+
+
+
 /* Estilos para el título */
 h1 {
     font-size: 40px;
@@ -34,22 +73,19 @@ h1 {
 }
 
 /* Estilo de los inputs y botones */
-input, select, button {
+input, button {
     background-color: black;
     color: #00ff00;
     border: 1px solid #00ff00;
     padding: 10px;
     margin: 10px;
-    width: 250px;
+    width: 100%;
     font-size: 18px;
     outline: none;
-}
-
-input, select {
     box-sizing: border-box;
 }
 
-input:focus, select:focus, button:focus {
+input:focus, button:focus {
     border: 1px solid #00cc00;
     box-shadow: 0 0 10px #00ff00;
 }
@@ -69,4 +105,77 @@ button:hover {
 button:active {
     background-color: #00ff00;
     color: black;
+}
+
+.autocomplete-list {
+    display: none; /* Oculta la lista inicialmente */
+    /* El resto del estilo sigue igual */
+}
+
+
+/* Estilo de cada sugerencia */
+.autocomplete-list li {
+    padding: 10px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.autocomplete-list li:hover {
+    background-color: #00ff00; /* Fondo verde al pasar el mouse */
+    color: black; /* Texto negro */
+}
+
+
+/* Contenedor del input y el icono */
+.input-container {
+    position: relative;
+    width: 100%;
+}
+
+/* Estilos del input */
+input {
+    background-color: black;
+    color: #00ff00;
+    border: 1px solid #00ff00;
+    padding: 10px;
+    margin: 10px;
+    width: 100%;
+    font-size: 18px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+/* Icono de la cruz */
+.clear-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #00ff00;
+    cursor: pointer;
+    font-size: 20px;
+    display: none; /* Inicialmente oculto */
+}
+
+input:focus + .clear-icon {
+    display: block; /* Muestra el icono cuando el input está enfocado */
+}
+
+/* Cuando el input tiene contenido, mostrar la cruz */
+input:not(:placeholder-shown) + .clear-icon {
+    display: block;
+}
+
+
+
+
+
+/* Estilos para la imagen mostrada */
+.image-display img {
+    max-width: 100%;
+    height: auto;
+    border: 2px solid #00ff00;
+    border-radius: 10px;
+    margin-top: 20px;
+    box-shadow: 0 0 20px #00ff00;
 }
