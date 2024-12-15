@@ -1,6 +1,6 @@
 // Importación de Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
 // Configuración de Firebase
 const firebaseConfig = {
@@ -25,6 +25,8 @@ onSnapshot(fotosRef, (querySnapshot) => {
             showImage(newImageUrl);
         }
     });
+}, (error) => {
+    console.error("Error al escuchar los cambios en Firestore:", error);
 });
 
 // Función para mostrar la imagen durante 5 segundos
@@ -32,8 +34,15 @@ function showImage(imageUrl) {
     const imageDisplay = document.getElementById('imageDisplay');
     const img = document.createElement('img');
     img.src = imageUrl;
+    img.alt = "Imagen de la galería";
     imageDisplay.innerHTML = ''; // Limpiar cualquier imagen anterior
     imageDisplay.appendChild(img);
+
+    // Estilo de imagen
+    img.style.maxWidth = '100%';
+    img.style.maxHeight = '100%';
+    img.style.border = '2px solid #ccc';
+    img.style.borderRadius = '8px';
 
     // Ocultar la imagen después de 5 segundos
     setTimeout(() => {

@@ -4,9 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cámara y Subida</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Usa el mismo archivo CSS -->
+    <link rel="stylesheet" href="styles.css">
     <style>
-        /* Agrega algunos ajustes para dispositivos móviles */
         body {
             display: flex;
             flex-direction: column;
@@ -49,21 +48,21 @@
     <canvas id="preview"></canvas>
     <button id="captureButton">Capturar Foto</button>
     <button id="uploadButton" style="display: none;">Subir Foto</button>
+    <button id="switchCameraButton">Cambiar Cámara</button> <!-- Botón para cambiar la cámara -->
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-storage.js";
 
-        // Configuración de Firebase
         const firebaseConfig = {
-  apiKey: "AIzaSyC20Cd64Ft_N1e48FHQSWXLUWFZ-ZDHW6o",
-  authDomain: "shinunfile.firebaseapp.com",
-  projectId: "shinunfile",
-  storageBucket: "shinunfile.firebasestorage.app",
-  messagingSenderId: "840995620433",
-  appId: "1:840995620433:web:8af5fe3fbb56dd8bbd1a70"
-};
+            apiKey: "AIzaSyC20Cd64Ft_N1e48FHQSWXLUWFZ-ZDHW6o",
+            authDomain: "shinunfile.firebaseapp.com",
+            projectId: "shinunfile",
+            storageBucket: "shinunfile.firebasestorage.app",
+            messagingSenderId: "840995620433",
+            appId: "1:840995620433:web:8af5fe3fbb56dd8bbd1a70"
+        };
 
         // Inicializa Firebase
         const app = initializeApp(firebaseConfig);
@@ -74,21 +73,54 @@
         const canvas = document.getElementById("preview");
         const captureButton = document.getElementById("captureButton");
         const uploadButton = document.getElementById("uploadButton");
+        const switchCameraButton = document.getElementById("switchCameraButton");
 
-        // Solicitar acceso a la cámara
-        async function startCamera() {
+        let currentStream;
+        let currentDeviceId = null;
+
+        // Inicia la cámara
+        async function startCamera(deviceId = null) {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const constraints = deviceId ? { video: { deviceId: { exact: deviceId } } } : { video: true };
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+
+                if (currentStream) {
+                    currentStream.getTracks().forEach(track => track.stop()); // Detener la cámara anterior
+                }
+
+                currentStream = stream;
                 camera.srcObject = stream;
+                currentDeviceId = deviceId;
             } catch (error) {
                 console.error("Error al acceder a la cámara:", error);
                 alert("No se pudo acceder a la cámara.");
             }
         }
 
-        startCamera();
+        // Detecta las cámaras disponibles
+        async function getCameras() {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = devices.filter(device => device.kind === 'videoinput');
+            return videoDevices;
+        }
 
-        // Capturar la imagen y mostrarla en el canvas
+        // Cambiar la cámara
+        switchCameraButton.addEventListener("click", async () => {
+            const cameras = await getCameras();
+            const currentCameraIndex = cameras.findIndex(camera => camera.deviceId === currentDeviceId);
+            const nextCamera = cameras[(currentCameraIndex + 1) % cameras.length]; // Cambiar al siguiente dispositivo
+
+            startCamera(nextCamera.deviceId); // Inicia la nueva cámara
+        });
+
+        // Inicia la cámara por defecto
+        getCameras().then(async (cameras) => {
+            if (cameras.length > 0) {
+                startCamera(cameras[0].deviceId);
+            }
+        });
+
+        // Captura la imagen y la muestra en el canvas
         captureButton.addEventListener("click", () => {
             const context = canvas.getContext("2d");
             canvas.width = camera.videoWidth;
@@ -98,46 +130,45 @@
             uploadButton.style.display = "block";
         });
 
+        // Subir la imagen a Firebase
         uploadButton.addEventListener("click", async () => {
-    const imageData = canvas.toDataURL("image/png");
+            const imageData = canvas.toDataURL("image/png");
 
-    // Convertir el DataURL en un archivo blob
-    const response = await fetch(imageData);
-    const blob = await response.blob();
+            // Convertir el DataURL a un blob
+            const response = await fetch(imageData);
+            const blob = await response.blob();
 
-    // Crear una referencia en Firebase Storage
-    const fileName = `foto_${Date.now()}.png`;
-    const storageRef = ref(storage, `fotos/${fileName}`);
+            // Crear una referencia en Firebase Storage
+            const fileName = `foto_${Date.now()}.png`;
+            const storageRef = ref(storage, `fotos/${fileName}`);
 
-    try {
-        // Subir la imagen a Firebase Storage
-        await uploadBytes(storageRef, blob);
-        console.log("Foto subida correctamente a Storage");
+            try {
+                // Subir la foto a Firebase Storage
+                await uploadBytes(storageRef, blob);
+                console.log("Foto subida correctamente a Storage");
 
-        // Obtener la URL del archivo subido
-        const url = await getDownloadURL(storageRef);
+                // Obtener la URL del archivo subido
+                const url = await getDownloadURL(storageRef);
+                console.log("URL de la imagen:", url);
 
-        console.log("URL de la imagen:", url);
+                // Guardar la referencia en Firestore
+                const fotosRef = collection(db, "fotos");
+                await addDoc(fotosRef, {
+                    nombre: fileName,
+                    url: url,
+                    fecha: new Date().toISOString()
+                });
 
-        // Guardar la referencia en Firestore
-        const fotosRef = collection(db, "fotos");
+                console.log("Foto guardada en Firestore");
 
-        await addDoc(fotosRef, {
-            nombre: fileName,
-            url: url,
-            fecha: new Date().toISOString()
+                // Ocultar el canvas y el botón de subir
+                canvas.style.display = "none";
+                uploadButton.style.display = "none";
+            } catch (error) {
+                console.error("Error al subir la foto:", error);
+                alert("Error al subir la foto. Intenta nuevamente.");
+            }
         });
-
-        console.log("Foto guardada en Firestore");
-
-        // Ocultar el canvas y el botón de subir
-        canvas.style.display = "none";
-        uploadButton.style.display = "none";
-    } catch (error) {
-        console.error("Error al subir la foto:", error);
-        alert("Error al subir la foto. Intenta nuevamente.");
-    }
-});
     </script>
 </body>
 </html>
