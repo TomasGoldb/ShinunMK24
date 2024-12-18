@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cargar Nombres desde CSV</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <video id="background-video" autoplay loop muted>
+        <source src="vecteezy_concept-d12-infinite-abstract-digital-sci-fi-high-technology_10675030.mp4" type="video/mp4">
+        Tu navegador no soporta el formato de video.
+    </video>
+    <div class="container" style="right: -600px;">
+        <h1>Ingresar contraseña</h1>
+        <input type="password" id="contra"/>
+        <button id="btnSubir">Entrar</button>
+    </div>
+
+
+    <script src="fondo.js"></script>
+    <script>
+        let input=document.getElementById("contra");
+        let boton=document.getElementById("btnSubir");
+        boton.addEventListener("click",()=>{
+            if(input.value=="nivelacion"){
+                console.log("si");
+                //LO QUE HAGA SI LA CONTRASEÑA ES INCORRECTA
+                window.location.href="/terceraInstancia.html"
+            }else{
+
+            }
+        });
+    </script>
+
+
+</body>
+</html>

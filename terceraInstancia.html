@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cargar Nombres desde CSV</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <video id="background-video" autoplay loop muted>
+        <source src="vecteezy_concept-d12-infinite-abstract-digital-sci-fi-high-technology_10675030.mp4" type="video/mp4">
+        Tu navegador no soporta el formato de video.
+    </video>
+    <div class="container" style="right: -600px;">
+        <h1>Publicar información</h1>
+    <button id="startButton">PUBLICAR</button>
+    <div class="loading-container">
+        <div class="loading-bar">
+            <!-- Cuadrados de la barra -->
+            <div class="loading-square"></div>
+            <div class="loading-square"></div>
+            <div class="loading-square"></div>
+            <div class="loading-square"></div>
+            <div class="loading-square"></div>
+            <div class="loading-square"></div>
+            <div class="loading-square"></div>
+            <div class="loading-square"></div>
+            <div class="loading-square"></div>
+            <div class="loading-square"></div>
+        </div>
+    </div>
+</div>
+    
+    
+    
+
+
+    <script src="fondo.js"></script>
+    <script>
+     document.getElementById("startButton").addEventListener("click", function () {
+    const loadingSquares = document.querySelectorAll(".loading-square");
+    let currentIndex = 0;
+
+    // Llenar los cuadrados progresivamente
+    const interval = setInterval(() => {
+        if (currentIndex < loadingSquares.length) {
+            loadingSquares[currentIndex].classList.add("filled"); // Llenar el cuadrado
+            currentIndex++;
+        } else {
+            clearInterval(interval); // Detener la animación cuando se completa
+            window.location.href="/subido.html"
+        }
+    }, 300); // Tiempo entre llenado de cada cuadrado (ajustable)
+
+});
+
+
+
+    </script>
+
+
+</body>
+</html>

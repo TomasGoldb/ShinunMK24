@@ -169,13 +169,29 @@ input:not(:placeholder-shown) + .clear-icon {
 
 
 
+/* Barra de carga */
+.loading-bar {
+    display: flex;
+    justify-content: start; /* Alinear los cuadrados al inicio */
+    gap: 5px; /* Espacio entre los cuadrados */
+    width: 100%; /* Ancho total del contenedor */
+    height: 20px; /* Altura total de la barra */
+    background-color: transparent;
+    position: relative;
+}
 
-/* Estilos para la imagen mostrada */
-.image-display img {
-    max-width: 100%;
-    height: auto;
-    border: 2px solid #00ff00;
-    border-radius: 10px;
-    margin-top: 20px;
-    box-shadow: 0 0 20px #00ff00;
+/* Cuadrados de la barra de progreso */
+.loading-square {
+    width: 20px; /* Tamaño de cada cuadrado */
+    height: 20px;
+    background-color: transparent; /* Vacío inicialmente */
+    border: 2px solid #00ff00; /* Borde verde */
+    border-radius: 2px;
+    box-sizing: border-box;
+    transition: background-color 0.3s ease; /* Transición para el llenado */
+}
+
+/* Estado lleno de los cuadrados */
+.loading-square.filled {
+    background-color: #00ff00; /* Color de llenado */
 }
