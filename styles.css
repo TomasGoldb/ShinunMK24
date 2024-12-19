@@ -56,7 +56,7 @@ video {
     width: calc(100% - 40px); /* Toma el ancho completo del input */
     box-shadow: 0 0 10px #00ff00;
     z-index: 100;
-    top: 245px; /* Ajusta este valor según la altura real del input */
+    top: 225px; /* Ajusta este valor según la altura real del input */
     left: 0; /* Alinea con el input */
     transform: translateX(4.5%);
 }
