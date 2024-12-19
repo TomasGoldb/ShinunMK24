@@ -50,7 +50,7 @@
 <body>
     <video id="camera" autoplay playsinline></video>
     <canvas id="preview"></canvas>
-    <select id="cameraSelect"></select> <!-- Nuevo desplegable -->
+    <select id="cameraSelect"></select>
     <button id="captureButton">Capturar Foto</button>
     <button id="uploadButton" style="display: none;">Subir Foto</button>
 
@@ -79,59 +79,61 @@
         const cameraSelect = document.getElementById("cameraSelect");
 
         let currentStream;
-        let currentDeviceId = null;
 
-        async function startCamera(deviceId = null) {
+        async function startCamera(constraints) {
             try {
-                const constraints = deviceId
-                    ? { video: { deviceId: { exact: deviceId } } }
-                    : { video: { facingMode: { ideal: "environment" } } }; // Prioriza la cámara trasera
-
                 const stream = await navigator.mediaDevices.getUserMedia(constraints);
-
                 if (currentStream) {
                     currentStream.getTracks().forEach(track => track.stop());
                 }
-
                 currentStream = stream;
                 camera.srcObject = stream;
-                currentDeviceId = deviceId;
+                console.log("Cámara iniciada con éxito.");
             } catch (error) {
-                console.error("Error al acceder a la cámara:", error);
-                alert("No se pudo acceder a esta cámara. Por favor, intenta con otra.");
-                populateCameraSelect(); // Intenta recargar la lista de cámaras
+                console.error("Error al iniciar la cámara:", error.message, error);
+                alert("No se pudo iniciar la cámara. Intenta con otro dispositivo o navegador.");
             }
-        }
-
-        async function getCameras() {
-            const devices = await navigator.mediaDevices.enumerateDevices();
-            return devices.filter(device => device.kind === 'videoinput');
         }
 
         async function populateCameraSelect() {
-            const cameras = await getCameras();
-            cameraSelect.innerHTML = "";
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                cameraSelect.innerHTML = "";
 
-            if (cameras.length === 0) {
-                alert("No se detectaron cámaras en el dispositivo.");
-                return;
-            }
+                if (videoDevices.length === 0) {
+                    alert("No se detectaron cámaras en este dispositivo.");
+                    return;
+                }
 
-            cameras.forEach((camera, index) => {
-                const option = document.createElement("option");
-                option.value = camera.deviceId;
-                option.textContent = camera.label || `Cámara ${index + 1}`;
-                cameraSelect.appendChild(option);
-            });
+                videoDevices.forEach((device, index) => {
+                    const option = document.createElement("option");
+                    option.value = device.deviceId;
+                    option.textContent = device.label || `Cámara ${index + 1}`;
+                    cameraSelect.appendChild(option);
+                });
 
-            if (cameras.length > 0) {
-                startCamera(cameras[0].deviceId);
-                cameraSelect.value = cameras[0].deviceId;
+                // Seleccionar la primera cámara por defecto
+                const defaultConstraints = {
+                    video: {
+                        deviceId: { exact: videoDevices[0].deviceId }
+                    }
+                };
+                await startCamera(defaultConstraints);
+            } catch (error) {
+                console.error("Error al listar las cámaras:", error.message, error);
+                alert("No se pudieron detectar las cámaras.");
             }
         }
 
-        cameraSelect.addEventListener("change", () => {
-            startCamera(cameraSelect.value);
+        cameraSelect.addEventListener("change", async () => {
+            const selectedDeviceId = cameraSelect.value;
+            const constraints = {
+                video: {
+                    deviceId: { exact: selectedDeviceId }
+                }
+            };
+            await startCamera(constraints);
         });
 
         captureButton.addEventListener("click", () => {
@@ -163,7 +165,7 @@
                 canvas.style.display = "none";
                 uploadButton.style.display = "none";
             } catch (error) {
-                console.error("Error al subir la foto:", error);
+                console.error("Error al subir la foto:", error.message, error);
                 alert("Error al subir la foto. Intenta nuevamente.");
             }
         });
