@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cámara y Subida</title>
-    <link rel="stylesheet" href="styles.css">
     <style>
         body {
             display: flex;
@@ -15,7 +14,6 @@
             margin: 0;
             background-color: #f4f4f4;
         }
-
         video, canvas {
             width: 90%;
             max-width: 400px;
@@ -23,27 +21,16 @@
             border-radius: 8px;
             margin-bottom: 10px;
         }
-
         button, select {
             padding: 10px 20px;
             font-size: 16px;
-            margin-bottom: 10px;
-            border: none;
+            margin: 5px;
+            border: 1px solid #ccc;
             border-radius: 5px;
             cursor: pointer;
         }
-
-        button {
-            background-color: #007BFF;
-            color: white;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        #preview {
-            display: none;
+        select {
+            background-color: #fff;
         }
     </style>
 </head>
@@ -54,24 +41,7 @@
     <button id="captureButton">Capturar Foto</button>
     <button id="uploadButton" style="display: none;">Subir Foto</button>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-storage.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyC20Cd64Ft_N1e48FHQSWXLUWFZ-ZDHW6o",
-            authDomain: "shinunfile.firebaseapp.com",
-            projectId: "shinunfile",
-            storageBucket: "shinunfile.firebasestorage.app",
-            messagingSenderId: "840995620433",
-            appId: "1:840995620433:web:8af5fe3fbb56dd8bbd1a70"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const storage = getStorage(app);
-
+    <script>
         const camera = document.getElementById("camera");
         const canvas = document.getElementById("preview");
         const captureButton = document.getElementById("captureButton");
@@ -80,62 +50,59 @@
 
         let currentStream;
 
-        async function startCamera(constraints) {
+        // Listar todas las cámaras disponibles
+        async function getCameras() {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            return devices.filter(device => device.kind === "videoinput");
+        }
+
+        // Iniciar la cámara seleccionada
+        async function startCamera(deviceId) {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia(constraints);
                 if (currentStream) {
-                    currentStream.getTracks().forEach(track => track.stop());
+                    currentStream.getTracks().forEach(track => track.stop()); // Detener la cámara anterior
                 }
+                const constraints = deviceId ? { video: { deviceId: { exact: deviceId } } } : { video: true };
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
                 currentStream = stream;
                 camera.srcObject = stream;
-                console.log("Cámara iniciada con éxito.");
             } catch (error) {
-                console.error("Error al iniciar la cámara:", error.message, error);
-                alert("No se pudo iniciar la cámara. Intenta con otro dispositivo o navegador.");
+                console.error("Error al iniciar la cámara:", error);
+                alert("No se pudo acceder a esta cámara. Prueba otra opción.");
             }
         }
 
+        // Llenar el menú desplegable con las cámaras disponibles
         async function populateCameraSelect() {
             try {
-                const devices = await navigator.mediaDevices.enumerateDevices();
-                const videoDevices = devices.filter(device => device.kind === 'videoinput');
-                cameraSelect.innerHTML = "";
+                const cameras = await getCameras();
+                cameraSelect.innerHTML = ""; // Limpiar las opciones previas
 
-                if (videoDevices.length === 0) {
-                    alert("No se detectaron cámaras en este dispositivo.");
-                    return;
-                }
-
-                videoDevices.forEach((device, index) => {
+                cameras.forEach((camera, index) => {
                     const option = document.createElement("option");
-                    option.value = device.deviceId;
-                    option.textContent = device.label || `Cámara ${index + 1}`;
+                    option.value = camera.deviceId;
+                    option.textContent = camera.label || `Cámara ${index + 1}`;
                     cameraSelect.appendChild(option);
                 });
 
-                // Seleccionar la primera cámara por defecto
-                const defaultConstraints = {
-                    video: {
-                        deviceId: { exact: videoDevices[0].deviceId }
-                    }
-                };
-                await startCamera(defaultConstraints);
+                // Iniciar con la primera cámara disponible
+                if (cameras.length > 0) {
+                    await startCamera(cameras[0].deviceId);
+                } else {
+                    alert("No se detectaron cámaras.");
+                }
             } catch (error) {
-                console.error("Error al listar las cámaras:", error.message, error);
-                alert("No se pudieron detectar las cámaras.");
+                console.error("Error al listar las cámaras:", error);
             }
         }
 
-        cameraSelect.addEventListener("change", async () => {
-            const selectedDeviceId = cameraSelect.value;
-            const constraints = {
-                video: {
-                    deviceId: { exact: selectedDeviceId }
-                }
-            };
-            await startCamera(constraints);
+        // Cambiar la cámara cuando se selecciona una nueva
+        cameraSelect.addEventListener("change", (event) => {
+            const deviceId = event.target.value;
+            startCamera(deviceId);
         });
 
+        // Capturar imagen
         captureButton.addEventListener("click", () => {
             const context = canvas.getContext("2d");
             canvas.width = camera.videoWidth;
@@ -145,31 +112,12 @@
             uploadButton.style.display = "block";
         });
 
-        uploadButton.addEventListener("click", async () => {
-            const imageData = canvas.toDataURL("image/png");
-            const response = await fetch(imageData);
-            const blob = await response.blob();
-            const fileName = `foto_${Date.now()}.png`;
-            const storageRef = ref(storage, `fotos/${fileName}`);
-
-            try {
-                await uploadBytes(storageRef, blob);
-                const url = await getDownloadURL(storageRef);
-                const fotosRef = collection(db, "fotos");
-                await addDoc(fotosRef, {
-                    nombre: fileName,
-                    url: url,
-                    fecha: new Date().toISOString()
-                });
-
-                canvas.style.display = "none";
-                uploadButton.style.display = "none";
-            } catch (error) {
-                console.error("Error al subir la foto:", error.message, error);
-                alert("Error al subir la foto. Intenta nuevamente.");
-            }
+        // Subir la imagen a un servidor o Firebase
+        uploadButton.addEventListener("click", () => {
+            alert("Aquí podrías implementar la subida de la imagen.");
         });
 
+        // Llenar el menú desplegable y configurar la cámara por defecto
         populateCameraSelect();
     </script>
 </body>
