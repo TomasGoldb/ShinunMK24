@@ -26,7 +26,11 @@
             if(input.value=="nivelacion"){
                 console.log("si");
                 //LO QUE HAGA SI LA CONTRASEÑA ES INCORRECTA
-                window.location.href+="/terceraInstancia.html"
+                if(window.location.href.includes("tomasgoldb.github")){
+                    window.location.href="https://tomasgoldb.github.io/ShinunMK24/terceraInstancia.html";
+                } else{
+                window.location.href="/terceraInstancia.html"
+                }
             }else{
 
             }
