@@ -83,7 +83,10 @@
 
         async function startCamera(deviceId = null) {
             try {
-                const constraints = deviceId ? { video: { deviceId: { exact: deviceId } } } : { video: true };
+                const constraints = deviceId
+                    ? { video: { deviceId: { exact: deviceId } } }
+                    : { video: { facingMode: { ideal: "environment" } } }; // Prioriza la cámara trasera
+
                 const stream = await navigator.mediaDevices.getUserMedia(constraints);
 
                 if (currentStream) {
@@ -95,7 +98,8 @@
                 currentDeviceId = deviceId;
             } catch (error) {
                 console.error("Error al acceder a la cámara:", error);
-                alert("No se pudo acceder a la cámara.");
+                alert("No se pudo acceder a esta cámara. Por favor, intenta con otra.");
+                populateCameraSelect(); // Intenta recargar la lista de cámaras
             }
         }
 
@@ -107,6 +111,11 @@
         async function populateCameraSelect() {
             const cameras = await getCameras();
             cameraSelect.innerHTML = "";
+
+            if (cameras.length === 0) {
+                alert("No se detectaron cámaras en el dispositivo.");
+                return;
+            }
 
             cameras.forEach((camera, index) => {
                 const option = document.createElement("option");
