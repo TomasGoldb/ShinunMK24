@@ -195,3 +195,14 @@ input:not(:placeholder-shown) + .clear-icon {
 .loading-square.filled {
     background-color: #00ff00; /* Color de llenado */
 }
+
+.centrado{
+    position: relative;
+    width: 100vh;
+    height: 100vw;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    align-items: center;
+    justify-content: center;
+}

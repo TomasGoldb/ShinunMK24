@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Búsqueda de Acciones Offline</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Búsqueda de Acciones</h1>
+        <div class="input-container">
+            <input id="nombreInput" autocomplete="off" type="text" placeholder="Escribe un nombre">
+        </div>
+        <ul id="sugerencias" class="autocomplete-list" style="display: none;"></ul>
+
+        <button id="btnBuscar">Buscar</button>
+        <div id="resultados"></div>
+
+        <h2>Agregar Acción</h2>
+        <input id="accionInput" type="text" placeholder="Escribe una acción">
+        <button id="btnSubir">Subir Acción</button>
+    </div>
+
+    <script type="module">
+      // Base de datos en JSON
+let baseDatos = {
+    "Juan": ["Acción 1", "Acción 2"],
+    "María": ["Acción 3"],
+    "Pedro": []
+};
+
+// Función para cargar nombres y configurar autocompletado
+function cargarNombres() {
+    const inputNombre = document.getElementById("nombreInput");
+    const listaAutocompletado = document.getElementById("sugerencias");
+
+    if (!inputNombre || !listaAutocompletado) {
+        console.error("Error: Elementos del DOM no encontrados. Revisa los IDs.");
+        return;
+    }
+
+    const nombres = Object.keys(baseDatos); // Obtener nombres
+
+    // Evento al escribir en el input
+    inputNombre.addEventListener("input", () => {
+        const valor = inputNombre.value.toLowerCase();
+        listaAutocompletado.innerHTML = ""; // Limpiar lista previa
+
+        if (valor) {
+            nombres
+                .filter(nombre => nombre.toLowerCase().includes(valor)) // Filtrar por coincidencias
+                .forEach(nombre => {
+                    const item = document.createElement("li");
+                    item.textContent = nombre;
+                    item.className = "autocomplete-item";
+                    item.addEventListener("click", () => {
+                        inputNombre.value = nombre; // Rellenar el input
+                        listaAutocompletado.innerHTML = ""; // Limpiar la lista
+                    });
+                    listaAutocompletado.appendChild(item);
+                });
+            listaAutocompletado.style.display = "block"; // Mostrar lista
+        } else {
+            listaAutocompletado.style.display = "none"; // Ocultar lista si no hay valor
+        }
+    });
+
+    // Ocultar lista al hacer clic fuera del input
+    document.addEventListener("click", (e) => {
+        if (!inputNombre.contains(e.target) && !listaAutocompletado.contains(e.target)) {
+            listaAutocompletado.innerHTML = ""; // Limpiar la lista
+            listaAutocompletado.style.display = "none"; // Ocultar lista
+        }
+    });
+}
+
+// Función para mostrar acciones de un nombre
+function verAcciones() {
+    const nombre = document.getElementById("nombreInput").value;
+    const resultadosDiv = document.getElementById("resultados");
+
+    if (!nombre || !baseDatos[nombre]) {
+        resultadosDiv.textContent = "Nombre no encontrado.";
+        return;
+    }
+
+    const acciones = baseDatos[nombre];
+    resultadosDiv.innerHTML = acciones.length === 0
+        ? "No hay acciones registradas para este usuario."
+        : acciones.map(accion => `<div>${accion}</div>`).join("");
+}
+
+// Función para agregar una acción a un nombre
+function subirAccion() {
+    const nombre = document.getElementById("nombreInput").value;
+    const accion = document.getElementById("accionInput").value;
+
+    if (!nombre || !baseDatos[nombre]) {
+        alert("Nombre no encontrado.");
+        return;
+    }
+
+    if (!accion) {
+        alert("Por favor, escribe una acción.");
+        return;
+    }
+
+    baseDatos[nombre].push(accion); // Agregar acción al JSON
+    alert("Acción agregada correctamente.");
+    document.getElementById("accionInput").value = ""; // Limpiar campo
+    verAcciones(); // Mostrar acciones actualizadas
+}
+
+// Event Listeners
+document.getElementById("btnBuscar").addEventListener("click", verAcciones);
+document.getElementById("btnSubir").addEventListener("click", subirAccion);
+
+// Inicializar autocompletado
+cargarNombres();
+
+    </script>
+</body>
+</html>

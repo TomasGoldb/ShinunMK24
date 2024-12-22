@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Búsqueda de Acciones (Offline)</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <video id="background-video" autoplay loop muted>
+        <source src="vecteezy_concept-d12-infinite-abstract-digital-sci-fi-high-technology_10675030.mp4" type="video/mp4">
+        Tu navegador no soporta el formato de video.
+    </video>
+    <div class="container">
+        <h1>Búsqueda de Acciones</h1>
+        <div class="input-container">
+            <input id="nombreInput" autocomplete="off" type="text" placeholder="Escribe un nombre">
+            <ul id="sugerencias" class="autocomplete-list"></ul>
+        </div>
+        <button id="btnBuscar">Buscar</button>
+        <div id="resultados"></div>
+    </div>
+    <script>
+        let baseDatos = {}; // Aquí se cargará el JSON local
+
+// Cargar datos desde el archivo JSON
+async function cargarDatos() {
+    try {
+        const response = await fetch("datos.json"); // Leer el archivo JSON
+        baseDatos = await response.json();
+        console.log("Datos cargados:", baseDatos);
+        inicializarAutocompletado();
+    } catch (error) {
+        console.error("Error al cargar los datos:", error);
+    }
+}
+
+// Inicializar el autocompletado
+function inicializarAutocompletado() {
+    const inputNombre = document.getElementById("nombreInput");
+    const listaSugerencias = document.getElementById("sugerencias");
+
+    const nombres = Object.keys(baseDatos); // Obtener nombres del JSON
+
+    inputNombre.addEventListener("input", () => {
+        const valor = inputNombre.value.toLowerCase();
+        listaSugerencias.innerHTML = ""; // Limpiar la lista previa
+
+        if (valor) {
+            nombres
+                .filter(nombre => nombre.toLowerCase().includes(valor)) // Filtrar coincidencias
+                .forEach(nombre => {
+                    const item = document.createElement("li");
+                    item.textContent = nombre;
+                    item.className = "autocomplete-item";
+                    item.addEventListener("click", () => {
+                        inputNombre.value = nombre; // Rellenar el input
+                        listaSugerencias.innerHTML = ""; // Limpiar la lista
+                    });
+                    listaSugerencias.appendChild(item);
+                });
+            listaSugerencias.style.display = "block"; // Mostrar lista
+        } else {
+            listaSugerencias.style.display = "none"; // Ocultar lista si no hay valor
+        }
+    });
+
+    document.addEventListener("click", (e) => {
+        if (!inputNombre.contains(e.target) && !listaSugerencias.contains(e.target)) {
+            listaSugerencias.innerHTML = ""; // Limpiar la lista
+            listaSugerencias.style.display = "none"; // Ocultar lista
+        }
+    });
+}
+
+// Mostrar las acciones asociadas a un nombre
+function mostrarAcciones() {
+    const nombre = document.getElementById("nombreInput").value;
+    const resultadosDiv = document.getElementById("resultados");
+
+    if (!nombre || !baseDatos[nombre]) {
+        resultadosDiv.textContent = "No se encontraron acciones para este nombre.";
+        return;
+    }
+
+    const acciones = baseDatos[nombre];
+    resultadosDiv.innerHTML = acciones.map(accion => `<div>${accion}</div>`).join("");
+}
+
+// Inicializar eventos
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("btnBuscar").addEventListener("click", mostrarAcciones);
+    cargarDatos(); // Cargar los datos del JSON
+});
+
+    </script>
+</body>
+</html>

@@ -16,7 +16,7 @@ for (let x = 0; x < columns; x++) {
 const canvas = document.createElement('canvas');
 canvas.width = canvasWidth;
 canvas.height = canvasHeight;
-document.body.appendChild(canvas);
+
 const ctx = canvas.getContext('2d');
 
 // Establecer el estilo del texto

@@ -7,11 +7,15 @@
     <link rel="stylesheet" href="styles.css"> <!-- Usa el mismo archivo CSS -->
 </head>
 <body>
+    <video id="background-video" autoplay loop muted>
+        <source src="vecteezy_concept-d12-infinite-abstract-digital-sci-fi-high-technology_10675030.mp4" type="video/mp4">
+        Tu navegador no soporta el formato de video.
+    </video>
     <div class="container">
         <div id="imageDisplay" class="image-display"></div> <!-- Aquí se mostrará la imagen -->
     </div>
 
-    <!-- Indica que el script es un módulo -->
+    <script src="fondo.js"></script>
     <script type="module" src="verFotos.js"></script> <!-- El archivo JS con la funcionalidad -->
 </body>
 </html>
